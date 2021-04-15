@@ -1,6 +1,8 @@
 package fastly
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestClient_Openstack(t *testing.T) {
 	t.Parallel()
@@ -12,28 +14,103 @@ func TestClient_Openstack(t *testing.T) {
 	})
 
 	// Create
-	var openstack *Openstack
+	var osCreateResp1, osCreateResp2, osCreateResp3 *Openstack
 	record(t, "openstack/create", func(c *Client) {
-		openstack, err = c.CreateOpenstack(&CreateOpenstackInput{
-			Service:         testServiceID,
-			Version:         tv.Number,
-			Name:            String("test-openstack"),
-			User:            String("user"),
-			AccessKey:       String("secret-key"),
-			BucketName:      String("bucket-name"),
-			URL:             String("https://logs.example.com/v1.0"),
-			Path:            String("/path"),
-			Period:          Uint(12),
-			GzipLevel:       Uint(9),
-			Format:          String("format"),
-			FormatVersion:   Uint(2),
-			TimestampFormat: String("%Y"),
-			MessageType:     String("classic"),
-			Placement:       String("waf_debug"),
-			PublicKey:       String(pgpPublicKey()),
+		osCreateResp1, err = c.CreateOpenstack(&CreateOpenstackInput{
+			ServiceID:        testServiceID,
+			ServiceVersion:   tv.Number,
+			Name:             "test-openstack",
+			User:             "user",
+			AccessKey:        "secret-key",
+			BucketName:       "bucket-name",
+			URL:              "https://logs.example.com/v1.0",
+			Path:             "/path",
+			Period:           12,
+			CompressionCodec: "snappy",
+			Format:           "format",
+			FormatVersion:    2,
+			TimestampFormat:  "%Y",
+			MessageType:      "classic",
+			Placement:        "waf_debug",
+			PublicKey:        pgpPublicKey(),
 		})
 	})
 	if err != nil {
+		t.Fatal(err)
+	}
+
+	record(t, "openstack/create2", func(c *Client) {
+		osCreateResp2, err = c.CreateOpenstack(&CreateOpenstackInput{
+			ServiceID:       testServiceID,
+			ServiceVersion:  tv.Number,
+			Name:            "test-openstack-2",
+			User:            "user",
+			AccessKey:       "secret-key",
+			BucketName:      "bucket-name",
+			URL:             "https://logs.example.com/v1.0",
+			Path:            "/path",
+			Period:          12,
+			GzipLevel:       8,
+			Format:          "format",
+			FormatVersion:   2,
+			TimestampFormat: "%Y",
+			MessageType:     "classic",
+			Placement:       "waf_debug",
+			PublicKey:       pgpPublicKey(),
+		})
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	record(t, "openstack/create3", func(c *Client) {
+		osCreateResp3, err = c.CreateOpenstack(&CreateOpenstackInput{
+			ServiceID:        testServiceID,
+			ServiceVersion:   tv.Number,
+			Name:             "test-openstack-3",
+			User:             "user",
+			AccessKey:        "secret-key",
+			BucketName:       "bucket-name",
+			URL:              "https://logs.example.com/v1.0",
+			Path:             "/path",
+			Period:           12,
+			CompressionCodec: "snappy",
+			Format:           "format",
+			FormatVersion:    2,
+			TimestampFormat:  "%Y",
+			MessageType:      "classic",
+			Placement:        "waf_debug",
+			PublicKey:        pgpPublicKey(),
+		})
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// This case is expected to fail because both CompressionCodec and
+	// GzipLevel are present.
+	record(t, "openstack/create4", func(c *Client) {
+		_, err = c.CreateOpenstack(&CreateOpenstackInput{
+			ServiceID:        testServiceID,
+			ServiceVersion:   tv.Number,
+			Name:             "test-openstack-4",
+			User:             "user",
+			AccessKey:        "secret-key",
+			BucketName:       "bucket-name",
+			URL:              "https://logs.example.com/v1.0",
+			Path:             "/path",
+			Period:           12,
+			CompressionCodec: "snappy",
+			GzipLevel:        8,
+			Format:           "format",
+			FormatVersion:    2,
+			TimestampFormat:  "%Y",
+			MessageType:      "classic",
+			Placement:        "waf_debug",
+			PublicKey:        pgpPublicKey(),
+		})
+	})
+	if err == nil {
 		t.Fatal(err)
 	}
 
@@ -41,68 +118,97 @@ func TestClient_Openstack(t *testing.T) {
 	defer func() {
 		record(t, "openstack/cleanup", func(c *Client) {
 			c.DeleteOpenstack(&DeleteOpenstackInput{
-				Service: testServiceID,
-				Version: tv.Number,
-				Name:    "test-openstack",
+				ServiceID:      testServiceID,
+				ServiceVersion: tv.Number,
+				Name:           "test-openstack",
 			})
 
 			c.DeleteOpenstack(&DeleteOpenstackInput{
-				Service: testServiceID,
-				Version: tv.Number,
-				Name:    "new-test-openstack",
+				ServiceID:      testServiceID,
+				ServiceVersion: tv.Number,
+				Name:           "test-openstack-2",
+			})
+
+			c.DeleteOpenstack(&DeleteOpenstackInput{
+				ServiceID:      testServiceID,
+				ServiceVersion: tv.Number,
+				Name:           "test-openstack-3",
+			})
+
+			c.DeleteOpenstack(&DeleteOpenstackInput{
+				ServiceID:      testServiceID,
+				ServiceVersion: tv.Number,
+				Name:           "new-test-openstack",
 			})
 		})
 	}()
 
-	if openstack.Name != "test-openstack" {
-		t.Errorf("bad name: %q", openstack.Name)
+	if osCreateResp1.Name != "test-openstack" {
+		t.Errorf("bad name: %q", osCreateResp1.Name)
 	}
-	if openstack.User != "user" {
-		t.Errorf("bad user: %q", openstack.User)
+	if osCreateResp1.User != "user" {
+		t.Errorf("bad user: %q", osCreateResp1.User)
 	}
-	if openstack.BucketName != "bucket-name" {
-		t.Errorf("bad bucket_name: %q", openstack.BucketName)
+	if osCreateResp1.BucketName != "bucket-name" {
+		t.Errorf("bad bucket_name: %q", osCreateResp1.BucketName)
 	}
-	if openstack.AccessKey != "secret-key" {
-		t.Errorf("bad access_key: %q", openstack.AccessKey)
+	if osCreateResp1.AccessKey != "secret-key" {
+		t.Errorf("bad access_key: %q", osCreateResp1.AccessKey)
 	}
-	if openstack.Path != "/path" {
-		t.Errorf("bad path: %q", openstack.Path)
+	if osCreateResp1.Path != "/path" {
+		t.Errorf("bad path: %q", osCreateResp1.Path)
 	}
-	if openstack.URL != "https://logs.example.com/v1.0" {
-		t.Errorf("bad url: %q", openstack.URL)
+	if osCreateResp1.URL != "https://logs.example.com/v1.0" {
+		t.Errorf("bad url: %q", osCreateResp1.URL)
 	}
-	if openstack.Period != 12 {
-		t.Errorf("bad period: %q", openstack.Period)
+	if osCreateResp1.Period != 12 {
+		t.Errorf("bad period: %q", osCreateResp1.Period)
 	}
-	if openstack.GzipLevel != 9 {
-		t.Errorf("bad gzip_level: %q", openstack.GzipLevel)
+	if osCreateResp1.CompressionCodec != "snappy" {
+		t.Errorf("bad comprssion_codec: %q", osCreateResp1.CompressionCodec)
 	}
-	if openstack.Format != "format" {
-		t.Errorf("bad format: %q", openstack.Format)
+	if osCreateResp1.GzipLevel != 0 {
+		t.Errorf("bad gzip_level: %q", osCreateResp1.GzipLevel)
 	}
-	if openstack.FormatVersion != 2 {
-		t.Errorf("bad format_version: %q", openstack.FormatVersion)
+	if osCreateResp1.Format != "format" {
+		t.Errorf("bad format: %q", osCreateResp1.Format)
 	}
-	if openstack.TimestampFormat != "%Y" {
-		t.Errorf("bad timestamp_format: %q", openstack.TimestampFormat)
+	if osCreateResp1.FormatVersion != 2 {
+		t.Errorf("bad format_version: %q", osCreateResp1.FormatVersion)
 	}
-	if openstack.MessageType != "classic" {
-		t.Errorf("bad message_type: %q", openstack.MessageType)
+	if osCreateResp1.TimestampFormat != "%Y" {
+		t.Errorf("bad timestamp_format: %q", osCreateResp1.TimestampFormat)
 	}
-	if openstack.Placement != "waf_debug" {
-		t.Errorf("bad placement: %q", openstack.Placement)
+	if osCreateResp1.MessageType != "classic" {
+		t.Errorf("bad message_type: %q", osCreateResp1.MessageType)
 	}
-	if openstack.PublicKey != pgpPublicKey() {
-		t.Errorf("bad public_key: %q", openstack.PublicKey)
+	if osCreateResp1.Placement != "waf_debug" {
+		t.Errorf("bad placement: %q", osCreateResp1.Placement)
+	}
+	if osCreateResp1.PublicKey != pgpPublicKey() {
+		t.Errorf("bad public_key: %q", osCreateResp1.PublicKey)
+	}
+
+	if osCreateResp2.CompressionCodec != "" {
+		t.Errorf("bad compression_codec: %q", osCreateResp2.CompressionCodec)
+	}
+	if osCreateResp2.GzipLevel != 8 {
+		t.Errorf("bad gzip_level: %q", osCreateResp2.GzipLevel)
+	}
+
+	if osCreateResp3.CompressionCodec != "snappy" {
+		t.Errorf("bad compression_codec: %q", osCreateResp3.CompressionCodec)
+	}
+	if osCreateResp3.GzipLevel != 0 {
+		t.Errorf("bad gzip_level: %q", osCreateResp3.GzipLevel)
 	}
 
 	// List
 	var lc []*Openstack
 	record(t, "openstack/list", func(c *Client) {
 		lc, err = c.ListOpenstack(&ListOpenstackInput{
-			Service: testServiceID,
-			Version: tv.Number,
+			ServiceID:      testServiceID,
+			ServiceVersion: tv.Number,
 		})
 	})
 	if err != nil {
@@ -113,91 +219,136 @@ func TestClient_Openstack(t *testing.T) {
 	}
 
 	// Get
-	var nopenstack *Openstack
+	var osGetResp *Openstack
 	record(t, "openstack/get", func(c *Client) {
-		nopenstack, err = c.GetOpenstack(&GetOpenstackInput{
-			Service: testServiceID,
-			Version: tv.Number,
-			Name:    "test-openstack",
+		osGetResp, err = c.GetOpenstack(&GetOpenstackInput{
+			ServiceID:      testServiceID,
+			ServiceVersion: tv.Number,
+			Name:           "test-openstack",
 		})
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if openstack.Name != nopenstack.Name {
-		t.Errorf("bad name: %q", openstack.Name)
+	if osCreateResp1.Name != osGetResp.Name {
+		t.Errorf("bad name: %q", osCreateResp1.Name)
 	}
-	if openstack.User != nopenstack.User {
-		t.Errorf("bad user: %q", openstack.User)
+	if osCreateResp1.User != osGetResp.User {
+		t.Errorf("bad user: %q", osCreateResp1.User)
 	}
-	if openstack.BucketName != nopenstack.BucketName {
-		t.Errorf("bad bucket_name: %q", openstack.BucketName)
+	if osCreateResp1.BucketName != osGetResp.BucketName {
+		t.Errorf("bad bucket_name: %q", osCreateResp1.BucketName)
 	}
-	if openstack.AccessKey != nopenstack.AccessKey {
-		t.Errorf("bad access_key: %q", openstack.AccessKey)
+	if osCreateResp1.AccessKey != osGetResp.AccessKey {
+		t.Errorf("bad access_key: %q", osCreateResp1.AccessKey)
 	}
-	if openstack.Path != nopenstack.Path {
-		t.Errorf("bad path: %q", openstack.Path)
+	if osCreateResp1.Path != osGetResp.Path {
+		t.Errorf("bad path: %q", osCreateResp1.Path)
 	}
-	if openstack.URL != nopenstack.URL {
-		t.Errorf("bad url: %q", openstack.URL)
+	if osCreateResp1.URL != osGetResp.URL {
+		t.Errorf("bad url: %q", osCreateResp1.URL)
 	}
-	if openstack.Period != nopenstack.Period {
-		t.Errorf("bad period: %q", openstack.Period)
+	if osCreateResp1.Period != osGetResp.Period {
+		t.Errorf("bad period: %q", osCreateResp1.Period)
 	}
-	if openstack.GzipLevel != nopenstack.GzipLevel {
-		t.Errorf("bad gzip_level: %q", openstack.GzipLevel)
+	if osCreateResp1.CompressionCodec != osGetResp.CompressionCodec {
+		t.Errorf("bad compression_codec: %q", osCreateResp1.CompressionCodec)
 	}
-	if openstack.Format != nopenstack.Format {
-		t.Errorf("bad format: %q", openstack.Format)
+	if osCreateResp1.GzipLevel != osGetResp.GzipLevel {
+		t.Errorf("bad gzip_level: %q", osCreateResp1.GzipLevel)
 	}
-	if openstack.FormatVersion != nopenstack.FormatVersion {
-		t.Errorf("bad format_version: %q", openstack.FormatVersion)
+	if osCreateResp1.Format != osGetResp.Format {
+		t.Errorf("bad format: %q", osCreateResp1.Format)
 	}
-	if openstack.TimestampFormat != nopenstack.TimestampFormat {
-		t.Errorf("bad timestamp_format: %q", openstack.TimestampFormat)
+	if osCreateResp1.FormatVersion != osGetResp.FormatVersion {
+		t.Errorf("bad format_version: %q", osCreateResp1.FormatVersion)
 	}
-	if openstack.MessageType != nopenstack.MessageType {
-		t.Errorf("bad message_type: %q", openstack.MessageType)
+	if osCreateResp1.TimestampFormat != osGetResp.TimestampFormat {
+		t.Errorf("bad timestamp_format: %q", osCreateResp1.TimestampFormat)
 	}
-	if openstack.Placement != nopenstack.Placement {
-		t.Errorf("bad placement: %q", openstack.Placement)
+	if osCreateResp1.MessageType != osGetResp.MessageType {
+		t.Errorf("bad message_type: %q", osCreateResp1.MessageType)
 	}
-	if openstack.PublicKey != nopenstack.PublicKey {
-		t.Errorf("bad public_key: %q", openstack.PublicKey)
+	if osCreateResp1.Placement != osGetResp.Placement {
+		t.Errorf("bad placement: %q", osCreateResp1.Placement)
+	}
+	if osCreateResp1.PublicKey != osGetResp.PublicKey {
+		t.Errorf("bad public_key: %q", osCreateResp1.PublicKey)
 	}
 
 	// Update
-	var uopenstack *Openstack
+	var osUpdateResp1, osUpdateResp2, osUpdateResp3 *Openstack
 	record(t, "openstack/update", func(c *Client) {
-		uopenstack, err = c.UpdateOpenstack(&UpdateOpenstackInput{
-			Service:   testServiceID,
-			Version:   tv.Number,
-			Name:      "test-openstack",
-			User:      String("new-user"),
-			NewName:   String("new-test-openstack"),
-			GzipLevel: Uint(0),
+		osUpdateResp1, err = c.UpdateOpenstack(&UpdateOpenstackInput{
+			ServiceID:        testServiceID,
+			ServiceVersion:   tv.Number,
+			Name:             "test-openstack",
+			User:             String("new-user"),
+			NewName:          String("new-test-openstack"),
+			CompressionCodec: String("zstd"),
 		})
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if uopenstack.Name != "new-test-openstack" {
-		t.Errorf("bad name: %q", uopenstack.Name)
+
+	record(t, "openstack/update2", func(c *Client) {
+		osUpdateResp2, err = c.UpdateOpenstack(&UpdateOpenstackInput{
+			ServiceID:        testServiceID,
+			ServiceVersion:   tv.Number,
+			Name:             "test-openstack-2",
+			CompressionCodec: String("zstd"),
+		})
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
-	if uopenstack.User != "new-user" {
-		t.Errorf("bad user: %q", uopenstack.User)
+
+	record(t, "openstack/update3", func(c *Client) {
+		osUpdateResp3, err = c.UpdateOpenstack(&UpdateOpenstackInput{
+			ServiceID:      testServiceID,
+			ServiceVersion: tv.Number,
+			Name:           "test-openstack-3",
+			GzipLevel:      Uint(9),
+		})
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
-	if uopenstack.GzipLevel != 0 {
-		t.Errorf("bad gzip_level: %q", uopenstack.GzipLevel)
+
+	if osUpdateResp1.Name != "new-test-openstack" {
+		t.Errorf("bad name: %q", osUpdateResp1.Name)
+	}
+	if osUpdateResp1.User != "new-user" {
+		t.Errorf("bad user: %q", osUpdateResp1.User)
+	}
+	if osUpdateResp1.CompressionCodec != "zstd" {
+		t.Errorf("bad compression_codec: %q", osUpdateResp1.CompressionCodec)
+	}
+	if osUpdateResp1.GzipLevel != 0 {
+		t.Errorf("bad gzip_level: %q", osUpdateResp1.GzipLevel)
+	}
+
+	if osUpdateResp2.CompressionCodec != "zstd" {
+		t.Errorf("bad compression_codec: %q", osUpdateResp2.CompressionCodec)
+	}
+	if osUpdateResp2.GzipLevel != 0 {
+		t.Errorf("bad gzip_level: %q", osUpdateResp2.GzipLevel)
+	}
+
+	if osUpdateResp3.CompressionCodec != "" {
+		t.Errorf("bad compression_codec: %q", osUpdateResp3.CompressionCodec)
+	}
+	if osUpdateResp3.GzipLevel != 9 {
+		t.Errorf("bad gzip_level: %q", osUpdateResp3.GzipLevel)
 	}
 
 	// Delete
 	record(t, "openstack/delete", func(c *Client) {
 		err = c.DeleteOpenstack(&DeleteOpenstackInput{
-			Service: testServiceID,
-			Version: tv.Number,
-			Name:    "new-test-openstack",
+			ServiceID:      testServiceID,
+			ServiceVersion: tv.Number,
+			Name:           "new-test-openstack",
 		})
 	})
 	if err != nil {
@@ -208,17 +359,17 @@ func TestClient_Openstack(t *testing.T) {
 func TestClient_ListOpenstack_validation(t *testing.T) {
 	var err error
 	_, err = testClient.ListOpenstack(&ListOpenstackInput{
-		Service: "",
+		ServiceID: "",
 	})
-	if err != ErrMissingService {
+	if err != ErrMissingServiceID {
 		t.Errorf("bad error: %s", err)
 	}
 
 	_, err = testClient.ListOpenstack(&ListOpenstackInput{
-		Service: "foo",
-		Version: 0,
+		ServiceID:      "foo",
+		ServiceVersion: 0,
 	})
-	if err != ErrMissingVersion {
+	if err != ErrMissingServiceVersion {
 		t.Errorf("bad error: %s", err)
 	}
 }
@@ -226,17 +377,17 @@ func TestClient_ListOpenstack_validation(t *testing.T) {
 func TestClient_CreateOpenstack_validation(t *testing.T) {
 	var err error
 	_, err = testClient.CreateOpenstack(&CreateOpenstackInput{
-		Service: "",
+		ServiceID: "",
 	})
-	if err != ErrMissingService {
+	if err != ErrMissingServiceID {
 		t.Errorf("bad error: %s", err)
 	}
 
 	_, err = testClient.CreateOpenstack(&CreateOpenstackInput{
-		Service: "foo",
-		Version: 0,
+		ServiceID:      "foo",
+		ServiceVersion: 0,
 	})
-	if err != ErrMissingVersion {
+	if err != ErrMissingServiceVersion {
 		t.Errorf("bad error: %s", err)
 	}
 }
@@ -244,24 +395,24 @@ func TestClient_CreateOpenstack_validation(t *testing.T) {
 func TestClient_GetOpenstack_validation(t *testing.T) {
 	var err error
 	_, err = testClient.GetOpenstack(&GetOpenstackInput{
-		Service: "",
+		ServiceID: "",
 	})
-	if err != ErrMissingService {
+	if err != ErrMissingServiceID {
 		t.Errorf("bad error: %s", err)
 	}
 
 	_, err = testClient.GetOpenstack(&GetOpenstackInput{
-		Service: "foo",
-		Version: 0,
+		ServiceID:      "foo",
+		ServiceVersion: 0,
 	})
-	if err != ErrMissingVersion {
+	if err != ErrMissingServiceVersion {
 		t.Errorf("bad error: %s", err)
 	}
 
 	_, err = testClient.GetOpenstack(&GetOpenstackInput{
-		Service: "foo",
-		Version: 1,
-		Name:    "",
+		ServiceID:      "foo",
+		ServiceVersion: 1,
+		Name:           "",
 	})
 	if err != ErrMissingName {
 		t.Errorf("bad error: %s", err)
@@ -271,24 +422,24 @@ func TestClient_GetOpenstack_validation(t *testing.T) {
 func TestClient_UpdateOpenstack_validation(t *testing.T) {
 	var err error
 	_, err = testClient.UpdateOpenstack(&UpdateOpenstackInput{
-		Service: "",
+		ServiceID: "",
 	})
-	if err != ErrMissingService {
+	if err != ErrMissingServiceID {
 		t.Errorf("bad error: %s", err)
 	}
 
 	_, err = testClient.UpdateOpenstack(&UpdateOpenstackInput{
-		Service: "foo",
-		Version: 0,
+		ServiceID:      "foo",
+		ServiceVersion: 0,
 	})
-	if err != ErrMissingVersion {
+	if err != ErrMissingServiceVersion {
 		t.Errorf("bad error: %s", err)
 	}
 
 	_, err = testClient.UpdateOpenstack(&UpdateOpenstackInput{
-		Service: "foo",
-		Version: 1,
-		Name:    "",
+		ServiceID:      "foo",
+		ServiceVersion: 1,
+		Name:           "",
 	})
 	if err != ErrMissingName {
 		t.Errorf("bad error: %s", err)
@@ -298,24 +449,24 @@ func TestClient_UpdateOpenstack_validation(t *testing.T) {
 func TestClient_DeleteOpenstack_validation(t *testing.T) {
 	var err error
 	err = testClient.DeleteOpenstack(&DeleteOpenstackInput{
-		Service: "",
+		ServiceID: "",
 	})
-	if err != ErrMissingService {
+	if err != ErrMissingServiceID {
 		t.Errorf("bad error: %s", err)
 	}
 
 	err = testClient.DeleteOpenstack(&DeleteOpenstackInput{
-		Service: "foo",
-		Version: 0,
+		ServiceID:      "foo",
+		ServiceVersion: 0,
 	})
-	if err != ErrMissingVersion {
+	if err != ErrMissingServiceVersion {
 		t.Errorf("bad error: %s", err)
 	}
 
 	err = testClient.DeleteOpenstack(&DeleteOpenstackInput{
-		Service: "foo",
-		Version: 1,
-		Name:    "",
+		ServiceID:      "foo",
+		ServiceVersion: 1,
+		Name:           "",
 	})
 	if err != ErrMissingName {
 		t.Errorf("bad error: %s", err)

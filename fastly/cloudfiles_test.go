@@ -1,6 +1,8 @@
 package fastly
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestClient_Cloudfiles(t *testing.T) {
 	t.Parallel()
@@ -12,28 +14,103 @@ func TestClient_Cloudfiles(t *testing.T) {
 	})
 
 	// Create
-	var cloudfiles *Cloudfiles
+	var cloudfilesCreateResp1, cloudfilesCreateResp2, cloudfilesCreateResp3 *Cloudfiles
 	record(t, "cloudfiles/create", func(c *Client) {
-		cloudfiles, err = c.CreateCloudfiles(&CreateCloudfilesInput{
-			Service:         testServiceID,
-			Version:         tv.Number,
-			Name:            String("test-cloudfiles"),
-			User:            String("user"),
-			AccessKey:       String("secret-key"),
-			BucketName:      String("bucket-name"),
-			Path:            String("/path"),
-			Region:          String("DFW"),
-			Period:          Uint(12),
-			GzipLevel:       Uint(9),
-			Format:          String("format"),
-			FormatVersion:   Uint(1),
-			TimestampFormat: String("%Y"),
-			MessageType:     String("classic"),
-			Placement:       String("waf_debug"),
-			PublicKey:       String(pgpPublicKey()),
+		cloudfilesCreateResp1, err = c.CreateCloudfiles(&CreateCloudfilesInput{
+			ServiceID:        testServiceID,
+			ServiceVersion:   tv.Number,
+			Name:             "test-cloudfiles",
+			User:             "user",
+			AccessKey:        "secret-key",
+			BucketName:       "bucket-name",
+			Path:             "/path",
+			Region:           "DFW",
+			Period:           12,
+			Format:           "format",
+			FormatVersion:    1,
+			TimestampFormat:  "%Y",
+			MessageType:      "classic",
+			Placement:        "waf_debug",
+			PublicKey:        pgpPublicKey(),
+			CompressionCodec: "snappy",
 		})
 	})
 	if err != nil {
+		t.Fatal(err)
+	}
+
+	record(t, "cloudfiles/create2", func(c *Client) {
+		cloudfilesCreateResp2, err = c.CreateCloudfiles(&CreateCloudfilesInput{
+			ServiceID:       testServiceID,
+			ServiceVersion:  tv.Number,
+			Name:            "test-cloudfiles-2",
+			User:            "user",
+			AccessKey:       "secret-key",
+			BucketName:      "bucket-name",
+			Path:            "/path",
+			Region:          "DFW",
+			Period:          12,
+			GzipLevel:       8,
+			Format:          "format",
+			FormatVersion:   1,
+			TimestampFormat: "%Y",
+			MessageType:     "classic",
+			Placement:       "waf_debug",
+			PublicKey:       pgpPublicKey(),
+		})
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	record(t, "cloudfiles/create3", func(c *Client) {
+		cloudfilesCreateResp3, err = c.CreateCloudfiles(&CreateCloudfilesInput{
+			ServiceID:        testServiceID,
+			ServiceVersion:   tv.Number,
+			Name:             "test-cloudfiles-3",
+			User:             "user",
+			AccessKey:        "secret-key",
+			BucketName:       "bucket-name",
+			Path:             "/path",
+			Region:           "DFW",
+			Period:           12,
+			Format:           "format",
+			FormatVersion:    1,
+			TimestampFormat:  "%Y",
+			MessageType:      "classic",
+			Placement:        "waf_debug",
+			PublicKey:        pgpPublicKey(),
+			CompressionCodec: "snappy",
+		})
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// This case is expected to fail because both CompressionCodec and
+	// GzipLevel are present.
+	record(t, "cloudfiles/create4", func(c *Client) {
+		_, err = c.CreateCloudfiles(&CreateCloudfilesInput{
+			ServiceID:        testServiceID,
+			ServiceVersion:   tv.Number,
+			Name:             "test-cloudfiles-4",
+			User:             "user",
+			AccessKey:        "secret-key",
+			BucketName:       "bucket-name",
+			Path:             "/path",
+			Region:           "DFW",
+			Period:           12,
+			GzipLevel:        8,
+			Format:           "format",
+			FormatVersion:    1,
+			TimestampFormat:  "%Y",
+			MessageType:      "classic",
+			Placement:        "waf_debug",
+			PublicKey:        pgpPublicKey(),
+			CompressionCodec: "snappy",
+		})
+	})
+	if err == nil {
 		t.Fatal(err)
 	}
 
@@ -41,68 +118,94 @@ func TestClient_Cloudfiles(t *testing.T) {
 	defer func() {
 		record(t, "cloudfiles/cleanup", func(c *Client) {
 			c.DeleteCloudfiles(&DeleteCloudfilesInput{
-				Service: testServiceID,
-				Version: tv.Number,
-				Name:    "test-cloudfiles",
+				ServiceID:      testServiceID,
+				ServiceVersion: tv.Number,
+				Name:           "test-cloudfiles",
 			})
 
 			c.DeleteCloudfiles(&DeleteCloudfilesInput{
-				Service: testServiceID,
-				Version: tv.Number,
-				Name:    "new-test-cloudfiles",
+				ServiceID:      testServiceID,
+				ServiceVersion: tv.Number,
+				Name:           "test-cloudfiles-2",
+			})
+
+			c.DeleteCloudfiles(&DeleteCloudfilesInput{
+				ServiceID:      testServiceID,
+				ServiceVersion: tv.Number,
+				Name:           "test-cloudfiles-3",
+			})
+
+			c.DeleteCloudfiles(&DeleteCloudfilesInput{
+				ServiceID:      testServiceID,
+				ServiceVersion: tv.Number,
+				Name:           "new-test-cloudfiles",
 			})
 		})
 	}()
 
-	if cloudfiles.Name != "test-cloudfiles" {
-		t.Errorf("bad name: %q", cloudfiles.Name)
+	if cloudfilesCreateResp1.Name != "test-cloudfiles" {
+		t.Errorf("bad name: %q", cloudfilesCreateResp1.Name)
 	}
-	if cloudfiles.User != "user" {
-		t.Errorf("bad user: %q", cloudfiles.User)
+	if cloudfilesCreateResp1.User != "user" {
+		t.Errorf("bad user: %q", cloudfilesCreateResp1.User)
 	}
-	if cloudfiles.BucketName != "bucket-name" {
-		t.Errorf("bad bucket_name: %q", cloudfiles.BucketName)
+	if cloudfilesCreateResp1.BucketName != "bucket-name" {
+		t.Errorf("bad bucket_name: %q", cloudfilesCreateResp1.BucketName)
 	}
-	if cloudfiles.AccessKey != "secret-key" {
-		t.Errorf("bad access_key: %q", cloudfiles.AccessKey)
+	if cloudfilesCreateResp1.AccessKey != "secret-key" {
+		t.Errorf("bad access_key: %q", cloudfilesCreateResp1.AccessKey)
 	}
-	if cloudfiles.Path != "/path" {
-		t.Errorf("bad path: %q", cloudfiles.Path)
+	if cloudfilesCreateResp1.Path != "/path" {
+		t.Errorf("bad path: %q", cloudfilesCreateResp1.Path)
 	}
-	if cloudfiles.Region != "DFW" {
-		t.Errorf("bad region: %q", cloudfiles.Region)
+	if cloudfilesCreateResp1.Region != "DFW" {
+		t.Errorf("bad region: %q", cloudfilesCreateResp1.Region)
 	}
-	if cloudfiles.Period != 12 {
-		t.Errorf("bad period: %q", cloudfiles.Period)
+	if cloudfilesCreateResp1.Period != 12 {
+		t.Errorf("bad period: %q", cloudfilesCreateResp1.Period)
 	}
-	if cloudfiles.GzipLevel != 9 {
-		t.Errorf("bad gzip_level: %q", cloudfiles.GzipLevel)
+	if cloudfilesCreateResp1.GzipLevel != 0 {
+		t.Errorf("bad gzip_level: %q", cloudfilesCreateResp1.GzipLevel)
 	}
-	if cloudfiles.Format != "format" {
-		t.Errorf("bad format: %q", cloudfiles.Format)
+	if cloudfilesCreateResp1.Format != "format" {
+		t.Errorf("bad format: %q", cloudfilesCreateResp1.Format)
 	}
-	if cloudfiles.FormatVersion != 1 {
-		t.Errorf("bad format_version: %q", cloudfiles.FormatVersion)
+	if cloudfilesCreateResp1.FormatVersion != 1 {
+		t.Errorf("bad format_version: %q", cloudfilesCreateResp1.FormatVersion)
 	}
-	if cloudfiles.TimestampFormat != "%Y" {
-		t.Errorf("bad timestamp_format: %q", cloudfiles.TimestampFormat)
+	if cloudfilesCreateResp1.TimestampFormat != "%Y" {
+		t.Errorf("bad timestamp_format: %q", cloudfilesCreateResp1.TimestampFormat)
 	}
-	if cloudfiles.MessageType != "classic" {
-		t.Errorf("bad message_type: %q", cloudfiles.MessageType)
+	if cloudfilesCreateResp1.MessageType != "classic" {
+		t.Errorf("bad message_type: %q", cloudfilesCreateResp1.MessageType)
 	}
-	if cloudfiles.Placement != "waf_debug" {
-		t.Errorf("bad placement: %q", cloudfiles.Placement)
+	if cloudfilesCreateResp1.Placement != "waf_debug" {
+		t.Errorf("bad placement: %q", cloudfilesCreateResp1.Placement)
 	}
-	if cloudfiles.PublicKey != pgpPublicKey() {
-		t.Errorf("bad public_key: %q", cloudfiles.PublicKey)
+	if cloudfilesCreateResp1.PublicKey != pgpPublicKey() {
+		t.Errorf("bad public_key: %q", cloudfilesCreateResp1.PublicKey)
+	}
+
+	if cloudfilesCreateResp2.CompressionCodec != "" {
+		t.Errorf("bad compression_codec: %q", cloudfilesCreateResp2.CompressionCodec)
+	}
+	if cloudfilesCreateResp2.GzipLevel != 8 {
+		t.Errorf("bad gzip_level: %q", cloudfilesCreateResp2.GzipLevel)
+	}
+
+	if cloudfilesCreateResp3.CompressionCodec != "snappy" {
+		t.Errorf("bad compression_codec: %q", cloudfilesCreateResp3.CompressionCodec)
+	}
+	if cloudfilesCreateResp3.GzipLevel != 0 {
+		t.Errorf("bad gzip_level: %q", cloudfilesCreateResp3.GzipLevel)
 	}
 
 	// List
 	var lc []*Cloudfiles
 	record(t, "cloudfiles/list", func(c *Client) {
 		lc, err = c.ListCloudfiles(&ListCloudfilesInput{
-			Service: testServiceID,
-			Version: tv.Number,
+			ServiceID:      testServiceID,
+			ServiceVersion: tv.Number,
 		})
 	})
 	if err != nil {
@@ -113,99 +216,147 @@ func TestClient_Cloudfiles(t *testing.T) {
 	}
 
 	// Get
-	var ncloudfiles *Cloudfiles
+	var cloudfilesGetResp *Cloudfiles
 	record(t, "cloudfiles/get", func(c *Client) {
-		ncloudfiles, err = c.GetCloudfiles(&GetCloudfilesInput{
-			Service: testServiceID,
-			Version: tv.Number,
-			Name:    "test-cloudfiles",
+		cloudfilesGetResp, err = c.GetCloudfiles(&GetCloudfilesInput{
+			ServiceID:      testServiceID,
+			ServiceVersion: tv.Number,
+			Name:           "test-cloudfiles",
 		})
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if cloudfiles.Name != ncloudfiles.Name {
-		t.Errorf("bad name: %q", cloudfiles.Name)
+	if cloudfilesCreateResp1.Name != cloudfilesGetResp.Name {
+		t.Errorf("bad name: %q", cloudfilesCreateResp1.Name)
 	}
-	if cloudfiles.User != ncloudfiles.User {
-		t.Errorf("bad user: %q", cloudfiles.User)
+	if cloudfilesCreateResp1.User != cloudfilesGetResp.User {
+		t.Errorf("bad user: %q", cloudfilesCreateResp1.User)
 	}
-	if cloudfiles.BucketName != ncloudfiles.BucketName {
-		t.Errorf("bad bucket_name: %q", cloudfiles.BucketName)
+	if cloudfilesCreateResp1.BucketName != cloudfilesGetResp.BucketName {
+		t.Errorf("bad bucket_name: %q", cloudfilesCreateResp1.BucketName)
 	}
-	if cloudfiles.AccessKey != ncloudfiles.AccessKey {
-		t.Errorf("bad access_key: %q", cloudfiles.AccessKey)
+	if cloudfilesCreateResp1.AccessKey != cloudfilesGetResp.AccessKey {
+		t.Errorf("bad access_key: %q", cloudfilesCreateResp1.AccessKey)
 	}
-	if cloudfiles.Path != ncloudfiles.Path {
-		t.Errorf("bad path: %q", cloudfiles.Path)
+	if cloudfilesCreateResp1.Path != cloudfilesGetResp.Path {
+		t.Errorf("bad path: %q", cloudfilesCreateResp1.Path)
 	}
-	if cloudfiles.Region != ncloudfiles.Region {
-		t.Errorf("bad region: %q", cloudfiles.Region)
+	if cloudfilesCreateResp1.Region != cloudfilesGetResp.Region {
+		t.Errorf("bad region: %q", cloudfilesCreateResp1.Region)
 	}
-	if cloudfiles.Period != ncloudfiles.Period {
-		t.Errorf("bad period: %q", cloudfiles.Period)
+	if cloudfilesCreateResp1.Period != cloudfilesGetResp.Period {
+		t.Errorf("bad period: %q", cloudfilesCreateResp1.Period)
 	}
-	if cloudfiles.GzipLevel != ncloudfiles.GzipLevel {
-		t.Errorf("bad gzip_level: %q", cloudfiles.GzipLevel)
+	if cloudfilesCreateResp1.GzipLevel != cloudfilesGetResp.GzipLevel {
+		t.Errorf("bad gzip_level: %q", cloudfilesCreateResp1.GzipLevel)
 	}
-	if cloudfiles.Format != ncloudfiles.Format {
-		t.Errorf("bad format: %q", cloudfiles.Format)
+	if cloudfilesCreateResp1.Format != cloudfilesGetResp.Format {
+		t.Errorf("bad format: %q", cloudfilesCreateResp1.Format)
 	}
-	if cloudfiles.FormatVersion != ncloudfiles.FormatVersion {
-		t.Errorf("bad format_version: %q", cloudfiles.FormatVersion)
+	if cloudfilesCreateResp1.FormatVersion != cloudfilesGetResp.FormatVersion {
+		t.Errorf("bad format_version: %q", cloudfilesCreateResp1.FormatVersion)
 	}
-	if cloudfiles.TimestampFormat != ncloudfiles.TimestampFormat {
-		t.Errorf("bad timestamp_format: %q", cloudfiles.TimestampFormat)
+	if cloudfilesCreateResp1.TimestampFormat != cloudfilesGetResp.TimestampFormat {
+		t.Errorf("bad timestamp_format: %q", cloudfilesCreateResp1.TimestampFormat)
 	}
-	if cloudfiles.MessageType != ncloudfiles.MessageType {
-		t.Errorf("bad message_type: %q", cloudfiles.MessageType)
+	if cloudfilesCreateResp1.MessageType != cloudfilesGetResp.MessageType {
+		t.Errorf("bad message_type: %q", cloudfilesCreateResp1.MessageType)
 	}
-	if cloudfiles.Placement != ncloudfiles.Placement {
-		t.Errorf("bad placement: %q", cloudfiles.Placement)
+	if cloudfilesCreateResp1.Placement != cloudfilesGetResp.Placement {
+		t.Errorf("bad placement: %q", cloudfilesCreateResp1.Placement)
 	}
-	if cloudfiles.PublicKey != ncloudfiles.PublicKey {
-		t.Errorf("bad public_key: %q", cloudfiles.PublicKey)
+	if cloudfilesCreateResp1.PublicKey != cloudfilesGetResp.PublicKey {
+		t.Errorf("bad public_key: %q", cloudfilesCreateResp1.PublicKey)
+	}
+	if cloudfilesCreateResp1.CompressionCodec != cloudfilesGetResp.CompressionCodec {
+		t.Errorf("bad compression_codec: %q", cloudfilesCreateResp1.CompressionCodec)
 	}
 
 	// Update
-	var ucloudfiles *Cloudfiles
+	var cloudfilesUpdateResp1, cloudfilesUpdateResp2, cloudfilesUpdateResp3 *Cloudfiles
 	record(t, "cloudfiles/update", func(c *Client) {
-		ucloudfiles, err = c.UpdateCloudfiles(&UpdateCloudfilesInput{
-			Service:       testServiceID,
-			Version:       tv.Number,
-			Name:          "test-cloudfiles",
-			NewName:       String("new-test-cloudfiles"),
-			User:          String("new-user"),
-			Period:        Uint(0),
-			GzipLevel:     Uint(0),
-			FormatVersion: Uint(2),
+		cloudfilesUpdateResp1, err = c.UpdateCloudfiles(&UpdateCloudfilesInput{
+			ServiceID:        testServiceID,
+			ServiceVersion:   tv.Number,
+			Name:             "test-cloudfiles",
+			NewName:          String("new-test-cloudfiles"),
+			User:             String("new-user"),
+			Period:           Uint(0),
+			FormatVersion:    Uint(2),
+			CompressionCodec: String("zstd"),
 		})
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if ucloudfiles.Name != "new-test-cloudfiles" {
-		t.Errorf("bad name: %q", ucloudfiles.Name)
+
+	record(t, "cloudfiles/update2", func(c *Client) {
+		cloudfilesUpdateResp2, err = c.UpdateCloudfiles(&UpdateCloudfilesInput{
+			ServiceID:        testServiceID,
+			ServiceVersion:   tv.Number,
+			Name:             "test-cloudfiles-2",
+			CompressionCodec: String("zstd"),
+		})
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
-	if ucloudfiles.User != "new-user" {
-		t.Errorf("bad user: %q", ucloudfiles.User)
+
+	record(t, "cloudfiles/update3", func(c *Client) {
+		cloudfilesUpdateResp3, err = c.UpdateCloudfiles(&UpdateCloudfilesInput{
+			ServiceID:      testServiceID,
+			ServiceVersion: tv.Number,
+			Name:           "test-cloudfiles-3",
+			GzipLevel:      Uint(9),
+		})
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
-	if ucloudfiles.GzipLevel != 0 {
-		t.Errorf("bad gzip_level: %q", ucloudfiles.GzipLevel)
+
+	if cloudfilesUpdateResp1.Name != "new-test-cloudfiles" {
+		t.Errorf("bad name: %q", cloudfilesUpdateResp1.Name)
 	}
-	if ucloudfiles.Period != 0 {
-		t.Errorf("bad period: %q", ucloudfiles.Period)
+	if cloudfilesUpdateResp1.User != "new-user" {
+		t.Errorf("bad user: %q", cloudfilesUpdateResp1.User)
 	}
-	if ucloudfiles.FormatVersion != 2 {
-		t.Errorf("bad format_version: %q", ucloudfiles.FormatVersion)
+	if cloudfilesUpdateResp1.GzipLevel != 0 {
+		t.Errorf("bad gzip_level: %q", cloudfilesUpdateResp1.GzipLevel)
+	}
+	if cloudfilesUpdateResp1.Period != 0 {
+		t.Errorf("bad period: %q", cloudfilesUpdateResp1.Period)
+	}
+	if cloudfilesUpdateResp1.FormatVersion != 2 {
+		t.Errorf("bad format_version: %q", cloudfilesUpdateResp1.FormatVersion)
+	}
+	if cloudfilesUpdateResp1.CompressionCodec != "zstd" {
+		t.Errorf("bad compression_codec: %q", cloudfilesUpdateResp1.CompressionCodec)
+	}
+	if cloudfilesUpdateResp1.GzipLevel != 0 {
+		t.Errorf("bad gzip_level: %q", cloudfilesUpdateResp1.GzipLevel)
+	}
+
+	if cloudfilesUpdateResp2.CompressionCodec != "zstd" {
+		t.Errorf("bad compression_codec: %q", cloudfilesUpdateResp2.CompressionCodec)
+	}
+	if cloudfilesUpdateResp2.GzipLevel != 0 {
+		t.Errorf("bad gzip_level: %q", cloudfilesUpdateResp2.GzipLevel)
+	}
+
+	if cloudfilesUpdateResp3.CompressionCodec != "" {
+		t.Errorf("bad compression_codec: %q", cloudfilesUpdateResp3.CompressionCodec)
+	}
+	if cloudfilesUpdateResp3.GzipLevel != 9 {
+		t.Errorf("bad gzip_level: %q", cloudfilesUpdateResp3.GzipLevel)
 	}
 
 	// Delete
 	record(t, "cloudfiles/delete", func(c *Client) {
 		err = c.DeleteCloudfiles(&DeleteCloudfilesInput{
-			Service: testServiceID,
-			Version: tv.Number,
-			Name:    "new-test-cloudfiles",
+			ServiceID:      testServiceID,
+			ServiceVersion: tv.Number,
+			Name:           "new-test-cloudfiles",
 		})
 	})
 	if err != nil {
@@ -216,17 +367,17 @@ func TestClient_Cloudfiles(t *testing.T) {
 func TestClient_ListCloudfiles_validation(t *testing.T) {
 	var err error
 	_, err = testClient.ListCloudfiles(&ListCloudfilesInput{
-		Service: "",
+		ServiceID: "",
 	})
-	if err != ErrMissingService {
+	if err != ErrMissingServiceID {
 		t.Errorf("bad error: %s", err)
 	}
 
 	_, err = testClient.ListCloudfiles(&ListCloudfilesInput{
-		Service: "foo",
-		Version: 0,
+		ServiceID:      "foo",
+		ServiceVersion: 0,
 	})
-	if err != ErrMissingVersion {
+	if err != ErrMissingServiceVersion {
 		t.Errorf("bad error: %s", err)
 	}
 }
@@ -234,17 +385,17 @@ func TestClient_ListCloudfiles_validation(t *testing.T) {
 func TestClient_CreateCloudfiles_validation(t *testing.T) {
 	var err error
 	_, err = testClient.CreateCloudfiles(&CreateCloudfilesInput{
-		Service: "",
+		ServiceID: "",
 	})
-	if err != ErrMissingService {
+	if err != ErrMissingServiceID {
 		t.Errorf("bad error: %s", err)
 	}
 
 	_, err = testClient.CreateCloudfiles(&CreateCloudfilesInput{
-		Service: "foo",
-		Version: 0,
+		ServiceID:      "foo",
+		ServiceVersion: 0,
 	})
-	if err != ErrMissingVersion {
+	if err != ErrMissingServiceVersion {
 		t.Errorf("bad error: %s", err)
 	}
 }
@@ -252,24 +403,24 @@ func TestClient_CreateCloudfiles_validation(t *testing.T) {
 func TestClient_GetCloudfiles_validation(t *testing.T) {
 	var err error
 	_, err = testClient.GetCloudfiles(&GetCloudfilesInput{
-		Service: "",
+		ServiceID: "",
 	})
-	if err != ErrMissingService {
+	if err != ErrMissingServiceID {
 		t.Errorf("bad error: %s", err)
 	}
 
 	_, err = testClient.GetCloudfiles(&GetCloudfilesInput{
-		Service: "foo",
-		Version: 0,
+		ServiceID:      "foo",
+		ServiceVersion: 0,
 	})
-	if err != ErrMissingVersion {
+	if err != ErrMissingServiceVersion {
 		t.Errorf("bad error: %s", err)
 	}
 
 	_, err = testClient.GetCloudfiles(&GetCloudfilesInput{
-		Service: "foo",
-		Version: 1,
-		Name:    "",
+		ServiceID:      "foo",
+		ServiceVersion: 1,
+		Name:           "",
 	})
 	if err != ErrMissingName {
 		t.Errorf("bad error: %s", err)
@@ -279,24 +430,24 @@ func TestClient_GetCloudfiles_validation(t *testing.T) {
 func TestClient_UpdateCloudfiles_validation(t *testing.T) {
 	var err error
 	_, err = testClient.UpdateCloudfiles(&UpdateCloudfilesInput{
-		Service: "",
+		ServiceID: "",
 	})
-	if err != ErrMissingService {
+	if err != ErrMissingServiceID {
 		t.Errorf("bad error: %s", err)
 	}
 
 	_, err = testClient.UpdateCloudfiles(&UpdateCloudfilesInput{
-		Service: "foo",
-		Version: 0,
+		ServiceID:      "foo",
+		ServiceVersion: 0,
 	})
-	if err != ErrMissingVersion {
+	if err != ErrMissingServiceVersion {
 		t.Errorf("bad error: %s", err)
 	}
 
 	_, err = testClient.UpdateCloudfiles(&UpdateCloudfilesInput{
-		Service: "foo",
-		Version: 1,
-		Name:    "",
+		ServiceID:      "foo",
+		ServiceVersion: 1,
+		Name:           "",
 	})
 	if err != ErrMissingName {
 		t.Errorf("bad error: %s", err)
@@ -306,24 +457,24 @@ func TestClient_UpdateCloudfiles_validation(t *testing.T) {
 func TestClient_DeleteCloudfiles_validation(t *testing.T) {
 	var err error
 	err = testClient.DeleteCloudfiles(&DeleteCloudfilesInput{
-		Service: "",
+		ServiceID: "",
 	})
-	if err != ErrMissingService {
+	if err != ErrMissingServiceID {
 		t.Errorf("bad error: %s", err)
 	}
 
 	err = testClient.DeleteCloudfiles(&DeleteCloudfilesInput{
-		Service: "foo",
-		Version: 0,
+		ServiceID:      "foo",
+		ServiceVersion: 0,
 	})
-	if err != ErrMissingVersion {
+	if err != ErrMissingServiceVersion {
 		t.Errorf("bad error: %s", err)
 	}
 
 	err = testClient.DeleteCloudfiles(&DeleteCloudfilesInput{
-		Service: "foo",
-		Version: 1,
-		Name:    "",
+		ServiceID:      "foo",
+		ServiceVersion: 1,
+		Name:           "",
 	})
 	if err != ErrMissingName {
 		t.Errorf("bad error: %s", err)

@@ -1,0 +1,54 @@
+---
+version: 1
+interactions:
+- request:
+    body: comment=go-fastly+wasm+client+test&name=test_service_wasm_package&type=wasm
+    form:
+      comment:
+      - go-fastly wasm client test
+      name:
+      - test_service_wasm_package
+      type:
+      - wasm
+    headers:
+      Content-Type:
+      - application/x-www-form-urlencoded
+      User-Agent:
+      - FastlyGo/2.1.0 (+github.com/fastly/go-fastly; go1.15.4)
+    url: https://api.fastly.com/service
+    method: POST
+  response:
+    body: '{"customer_id":"51MumwLiSJyFTWhtbByYgR","comment":"go-fastly wasm client
+      test","name":"test_service_wasm_package","type":"wasm","paused":false,"id":"7i6HN3TK9wS159v2gPAZ8A","publish_key":"","updated_at":"2021-01-14T10:26:15Z","versions":[{"service_id":"7i6HN3TK9wS159v2gPAZ8A","comment":"","deployed":false,"deleted_at":null,"created_at":"2021-01-14T10:26:15Z","updated_at":"2021-01-14T10:26:15Z","testing":false,"staging":false,"number":1,"locked":false,"active":false}],"created_at":"2021-01-14T10:26:15Z","deleted_at":null}'
+    headers:
+      Accept-Ranges:
+      - bytes
+      Cache-Control:
+      - no-cache
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 14 Jan 2021 10:26:15 GMT
+      Fastly-Ratelimit-Remaining:
+      - "912"
+      Fastly-Ratelimit-Reset:
+      - "1610622000"
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=31536000
+      Vary:
+      - Accept-Encoding
+      Via:
+      - 1.1 varnish, 1.1 varnish
+      X-Cache:
+      - MISS, MISS
+      X-Cache-Hits:
+      - 0, 0
+      X-Served-By:
+      - cache-control-slwdc9036-CONTROL-SLWDC, cache-man4135-MAN
+      X-Timer:
+      - S1610619975.882968,VS0,VE258
+    status: 200 OK
+    code: 200
+    duration: ""

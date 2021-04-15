@@ -35,14 +35,14 @@ type ServiceDetail struct {
 }
 
 type ServiceDomain struct {
-	Locked    bool       `mapstructure:"locked"`
-	Version   int64      `mapstructure:"version"`
-	Name      string     `mapstructure:"name"`
-	DeletedAt *time.Time `mapstructure:"deleted_at"`
-	ServiceID string     `mapstructure:"service_id"`
-	CreatedAt *time.Time `mapstructure:"created_at"`
-	Comment   string     `mapstructure:"comment"`
-	UpdatedAt *time.Time `mapstructure:"updated_at"`
+	Locked         bool       `mapstructure:"locked"`
+	Name           string     `mapstructure:"name"`
+	DeletedAt      *time.Time `mapstructure:"deleted_at"`
+	ServiceID      string     `mapstructure:"service_id"`
+	ServiceVersion int64      `mapstructure:"version"`
+	CreatedAt      *time.Time `mapstructure:"created_at"`
+	Comment        string     `mapstructure:"comment"`
+	UpdatedAt      *time.Time `mapstructure:"updated_at"`
 }
 type ServiceDomainsList []*ServiceDomain
 
@@ -145,19 +145,27 @@ func (c *Client) GetServiceDetails(i *GetServiceInput) (*ServiceDetail, error) {
 
 // UpdateServiceInput is used as input to the UpdateService function.
 type UpdateServiceInput struct {
-	ID string
+	ServiceID string
 
-	Name    string `form:"name,omitempty"`
-	Comment string `form:"comment,omitempty"`
+	Name    *string `form:"name,omitempty"`
+	Comment *string `form:"comment,omitempty"`
 }
 
 // UpdateService updates the service with the given input.
 func (c *Client) UpdateService(i *UpdateServiceInput) (*Service, error) {
-	if i.ID == "" {
-		return nil, ErrMissingID
+	if i.ServiceID == "" {
+		return nil, ErrMissingServiceID
 	}
 
-	path := fmt.Sprintf("/service/%s", i.ID)
+	if i.Name == nil && i.Comment == nil {
+		return nil, ErrMissingOptionalNameComment
+	}
+
+	if i.Name != nil && *i.Name == "" {
+		return nil, ErrMissingNameValue
+	}
+
+	path := fmt.Sprintf("/service/%s", i.ServiceID)
 	resp, err := c.PutForm(path, i, nil)
 	if err != nil {
 		return nil, err
@@ -192,7 +200,7 @@ func (c *Client) DeleteService(i *DeleteServiceInput) error {
 		return err
 	}
 	if !r.Ok() {
-		return fmt.Errorf("Not Ok")
+		return ErrNotOK
 	}
 	return nil
 }

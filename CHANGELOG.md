@@ -1,5 +1,157 @@
 # Changelog
 
+## [v3.6.0](https://github.com/fastly/go-fastly/releases/tag/v3.6.0) (2021-04-15)
+
+[Full Changelog](https://github.com/fastly/go-fastly/compare/v3.5.0...v3.6.0)
+
+**Enhancements:**
+
+- Fix testing behavior for logging endpoints the support compression [\#271](https://github.com/fastly/go-fastly/pull/271)
+
+## [v3.5.0](https://github.com/fastly/go-fastly/releases/tag/v3.5.0) (2021-04-06)
+
+[Full Changelog](https://github.com/fastly/go-fastly/compare/v3.4.1...v3.5.0)
+
+**Enhancements:**
+
+- Support usage of IAM role in S3 and Kinesis logging endpoints [\#269](https://github.com/fastly/go-fastly/pull/269)
+
+## [v3.4.1](https://github.com/fastly/go-fastly/releases/tag/v3.4.1) (2021-03-25)
+
+[Full Changelog](https://github.com/fastly/go-fastly/compare/v3.4.0...v3.4.1)
+
+**Bug fixes:**
+
+- Purge with Soft=true bug [\#266](https://github.com/fastly/go-fastly/issues/266)
+- Initialise Headers map to avoid runtime panic when purging. [\#267](https://github.com/fastly/go-fastly/pull/267)
+
+**Closed issues:**
+
+- Potentially misleading comment in README.md [\#260](https://github.com/fastly/go-fastly/issues/260)
+
+## [v3.4.0](https://github.com/fastly/go-fastly/releases/tag/v3.4.0) (2021-02-18)
+
+[Full Changelog](https://github.com/fastly/go-fastly/compare/v3.3.0...v3.4.0)
+
+**Enhancements:**
+
+- Add PATCH endpoint for TLS Subscriptions [\#262](https://github.com/fastly/go-fastly/pull/262)
+
+## [v3.3.0](https://github.com/fastly/go-fastly/releases/tag/v3.3.0) (2021-02-15)
+
+[Full Changelog](https://github.com/fastly/go-fastly/compare/v3.2.0...v3.3.0)
+
+**Enhancements:**
+
+- Updates needed to support Terraform TLS resources [\#259](https://github.com/fastly/go-fastly/pull/259)
+
+## [v3.2.0](https://github.com/fastly/go-fastly/releases/tag/v3.2.0) (2021-02-04)
+
+[Full Changelog](https://github.com/fastly/go-fastly/compare/v3.1.0...v3.2.0)
+
+**Enhancements:**
+
+- Add more support for compression\_codec to logging endpoints [\#257](https://github.com/fastly/go-fastly/pull/257)
+
+## [v3.1.0](https://github.com/fastly/go-fastly/releases/tag/v3.1.0) (2021-01-28)
+
+[Full Changelog](https://github.com/fastly/go-fastly/compare/v3.0.0...v3.1.0)
+
+**Enhancements:**
+
+- Add support for file\_max\_bytes configuration for azure logging endpoint [\#255](https://github.com/fastly/go-fastly/pull/255)
+
+## [v3.0.0](https://github.com/fastly/go-fastly/releases/tag/v3.0.0) (2021-01-19)
+
+[Full Changelog](https://github.com/fastly/go-fastly/compare/v2.1.0...v3.0.0)
+
+**Enhancements:**
+
+- Strip TLS prefix from TLS struct fields [\#250](https://github.com/fastly/go-fastly/pull/250)
+- Avoid generic ID field when more explicit naming would be clearer [\#247](https://github.com/fastly/go-fastly/pull/247)
+- Update Test Fixtures [\#245](https://github.com/fastly/go-fastly/pull/245)
+- Add region support to logentries logging endpoint [\#243](https://github.com/fastly/go-fastly/pull/243)
+- Add basic managed logging endpoint support to go-fastly [\#241](https://github.com/fastly/go-fastly/pull/241)
+- Create new error abstraction for field validation [\#239](https://github.com/fastly/go-fastly/pull/239)
+
+**Bug fixes:**
+
+- NewName should be optional [\#252](https://github.com/fastly/go-fastly/pull/252)
+- Dictionary ItemValue isn't optional [\#251](https://github.com/fastly/go-fastly/pull/251)
+- Ensure consistent naming for ServiceID \(fixes missed references\) [\#249](https://github.com/fastly/go-fastly/pull/249)
+- Update to RequestMaxBytes to align with updated API and regenerate fixtures [\#248](https://github.com/fastly/go-fastly/pull/248)
+- Cleanup naming of Kinesis to be more consistent. [\#246](https://github.com/fastly/go-fastly/pull/246)
+- Reword expected error message based on API changes [\#244](https://github.com/fastly/go-fastly/pull/244)
+
+**Closed issues:**
+
+- Remove uninitialized ActiveVersion field from Service struct? [\#242](https://github.com/fastly/go-fastly/issues/242)
+- Cache setting is missing the 'deliver' action [\#136](https://github.com/fastly/go-fastly/issues/136)
+
+## [v2.1.0](https://github.com/fastly/go-fastly/releases/tag/v2.1.0) (2020-12-11)
+
+[Full Changelog](https://github.com/fastly/go-fastly/compare/v2.0.0...v2.1.0)
+
+**Enhancements:**
+
+- Add support for TLS client and batch size options for splunk [\#236](https://github.com/fastly/go-fastly/pull/236)
+- Add support for compression\_codec to logging file sink endpoints [\#235](https://github.com/fastly/go-fastly/pull/235)
+- Add support for Kinesis logging endpoint [\#234](https://github.com/fastly/go-fastly/pull/234)
+- Add SASL fields support for Kafka Logging Endpoint [\#226](https://github.com/fastly/go-fastly/pull/226)
+- Custom TLS API  [\#225](https://github.com/fastly/go-fastly/pull/225)
+
+**Closed issues:**
+
+- Any plan to add custom TLS certificates? [\#224](https://github.com/fastly/go-fastly/issues/224)
+
+## [v2.0.0](https://github.com/fastly/go-fastly/releases/tag/v2.0.0) (2020-11-17)
+
+[Full Changelog](https://github.com/fastly/go-fastly/compare/v1.18.0...v2.0.0)
+
+**Enhancements:**
+
+- v2 [\#230](https://github.com/fastly/go-fastly/pull/230)
+
+**Closed issues:**
+
+- Fails to Parse Historic Stats when no Service Provided [\#214](https://github.com/fastly/go-fastly/issues/214)
+
+## [v1.18.0](https://github.com/fastly/go-fastly/releases/tag/v1.18.0) (2020-10-28)
+
+[Full Changelog](https://github.com/fastly/go-fastly/compare/v1.17.0...v1.18.0)
+
+## [v1.17.0](https://github.com/fastly/go-fastly/releases/tag/v1.17.0) (2020-07-20)
+
+[Full Changelog](https://github.com/fastly/go-fastly/compare/v1.16.2...v1.17.0)
+
+**Enhancements:**
+
+- Added support to list all datacenters [\#210](https://github.com/fastly/go-fastly/pull/210)
+
+## [v1.16.2](https://github.com/fastly/go-fastly/releases/tag/v1.16.2) (2020-07-13)
+
+[Full Changelog](https://github.com/fastly/go-fastly/compare/v1.16.1...v1.16.2)
+
+**Bug fixes:**
+
+- Allow message\_type support for FTP endpoint [\#212](https://github.com/fastly/go-fastly/pull/212)
+
+## [v1.16.1](https://github.com/fastly/go-fastly/releases/tag/v1.16.1) (2020-07-07)
+
+[Full Changelog](https://github.com/fastly/go-fastly/compare/v1.16.0...v1.16.1)
+
+**Bug fixes:**
+
+- ci: add GH Action for fmt, vet, staticcheck, test [\#184](https://github.com/fastly/go-fastly/pull/184)
+
+## [v1.16.0](https://github.com/fastly/go-fastly/releases/tag/v1.16.0) (2020-06-25)
+
+[Full Changelog](https://github.com/fastly/go-fastly/compare/v1.15.0...v1.16.0)
+
+**Enhancements:**
+
+- Add support for Compute@Edge Packages [\#203](https://github.com/fastly/go-fastly/pull/203)
+
 ## [v1.15.0](https://github.com/fastly/go-fastly/releases/tag/v1.15.0) (2020-06-04)
 
 [Full Changelog](https://github.com/fastly/go-fastly/compare/v1.14.0...v1.15.0)

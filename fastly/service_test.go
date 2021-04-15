@@ -1,6 +1,8 @@
 package fastly
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestClient_Services(t *testing.T) {
 	t.Parallel()
@@ -122,8 +124,8 @@ func TestClient_Services(t *testing.T) {
 	var us *Service
 	record(t, "services/update", func(c *Client) {
 		us, err = c.UpdateService(&UpdateServiceInput{
-			ID:   s.ID,
-			Name: "new-test-service",
+			ServiceID: s.ID,
+			Name:      String("new-test-service"),
 		})
 	})
 	if err != nil {
@@ -169,14 +171,28 @@ func TestClient_GetService_validation(t *testing.T) {
 func TestClient_UpdateService_validation(t *testing.T) {
 	var err error
 	_, err = testClient.UpdateService(&UpdateServiceInput{})
-	if err != ErrMissingID {
+	if err != ErrMissingServiceID {
+		t.Errorf("bad error: %s", err)
+	}
+
+	_, err = testClient.UpdateService(&UpdateServiceInput{
+		ServiceID: "foo",
+	})
+	if err != ErrMissingOptionalNameComment {
+		t.Errorf("bad error: %s", err)
+	}
+
+	_, err = testClient.UpdateService(&UpdateServiceInput{
+		ServiceID: "foo",
+		Name:      String(""),
+	})
+	if err != ErrMissingNameValue {
 		t.Errorf("bad error: %s", err)
 	}
 }
 
 func TestClient_DeleteService_validation(t *testing.T) {
-	var err error
-	err = testClient.DeleteService(&DeleteServiceInput{})
+	err := testClient.DeleteService(&DeleteServiceInput{})
 	if err != ErrMissingID {
 		t.Errorf("bad error: %s", err)
 	}

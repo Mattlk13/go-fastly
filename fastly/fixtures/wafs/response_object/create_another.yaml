@@ -2,45 +2,38 @@
 version: 1
 interactions:
 - request:
-    body: Service=7i6HN3TK9wS159v2gPAZ8A&Version=34&content=efgh&content_type=text%2Fplain&name=test-response-object-2&response=Ok&status=200
+    body: ServiceID=5OTf0ZHln9oPp7u1f73YdC&ServiceVersion=2&name=WAF_Response2&status=403
     form:
-      Service:
-      - 7i6HN3TK9wS159v2gPAZ8A
-      Version:
-      - "34"
-      content:
-      - efgh
-      content_type:
-      - text/plain
+      ServiceID:
+      - 5OTf0ZHln9oPp7u1f73YdC
+      ServiceVersion:
+      - "2"
       name:
-      - test-response-object-2
-      response:
-      - Ok
+      - WAF_Response2
       status:
-      - "200"
+      - "403"
     headers:
       Content-Type:
       - application/x-www-form-urlencoded
       User-Agent:
-      - FastlyGo/1.10.0 (+github.com/fastly/go-fastly; go1.12)
-    url: https://api.fastly.com/service/7i6HN3TK9wS159v2gPAZ8A/version/34/response_object
+      - FastlyGo/2.1.0 (+github.com/fastly/go-fastly; go1.15.4)
+    url: https://api.fastly.com/service/5OTf0ZHln9oPp7u1f73YdC/version/2/response_object
     method: POST
   response:
-    body: '{"content":"efgh","content_type":"text/plain","name":"test-response-object-2","response":"Ok","status":"200","service_id":"7i6HN3TK9wS159v2gPAZ8A","version":"34","request_condition":"","created_at":"2020-05-15T15:35:17Z","deleted_at":null,"cache_condition":"","updated_at":"2020-05-15T15:35:17Z"}'
+    body: '{"name":"WAF_Response2","status":"403","service_id":"5OTf0ZHln9oPp7u1f73YdC","version":"2","deleted_at":null,"created_at":"2021-01-14T10:27:48Z","content":null,"response":"ok","request_condition":"","cache_condition":"","content_type":null,"updated_at":"2021-01-14T10:27:48Z"}'
     headers:
       Accept-Ranges:
-      - bytes
       - bytes
       Cache-Control:
       - no-cache
       Content-Type:
       - application/json
       Date:
-      - Fri, 15 May 2020 15:35:17 GMT
+      - Thu, 14 Jan 2021 10:27:49 GMT
       Fastly-Ratelimit-Remaining:
-      - "959"
+      - "865"
       Fastly-Ratelimit-Reset:
-      - "1589558400"
+      - "1610622000"
       Status:
       - 200 OK
       Strict-Transport-Security:
@@ -48,16 +41,15 @@ interactions:
       Vary:
       - Accept-Encoding
       Via:
-      - 1.1 varnish
-      - 1.1 varnish
+      - 1.1 varnish, 1.1 varnish
       X-Cache:
       - MISS, MISS
       X-Cache-Hits:
       - 0, 0
       X-Served-By:
-      - cache-control-slwdc9036-CONTROL-SLWDC, cache-sea4480-SEA
+      - cache-control-slwdc9036-CONTROL-SLWDC, cache-man4123-MAN
       X-Timer:
-      - S1589556917.459714,VS0,VE278
+      - S1610620069.782790,VS0,VE247
     status: 200 OK
     code: 200
     duration: ""

@@ -1,6 +1,8 @@
 package fastly
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestClient_GetCurrentUser(t *testing.T) {
 	t.Parallel()
@@ -26,7 +28,7 @@ func TestClient_Users(t *testing.T) {
 	var u *User
 	record(t, fixtureBase+"create", func(c *Client) {
 		u, err = c.CreateUser(&CreateUserInput{
-			Login: "test+user@example.com",
+			Login: "go-fastly-test+user1@example.com",
 			Name:  "test user",
 			Role:  "engineer",
 		})
@@ -44,7 +46,7 @@ func TestClient_Users(t *testing.T) {
 		})
 	}()
 
-	if u.Login != "test+user@example.com" {
+	if u.Login != "go-fastly-test+user1@example.com" {
 		t.Errorf("bad login: %v", u.Login)
 	}
 
@@ -89,8 +91,8 @@ func TestClient_Users(t *testing.T) {
 	record(t, fixtureBase+"update", func(c *Client) {
 		uu, err = c.UpdateUser(&UpdateUserInput{
 			ID:   u.ID,
-			Name: "updated user",
-			Role: "superuser",
+			Name: String("updated user"),
+			Role: String("superuser"),
 		})
 	})
 	if err != nil {
@@ -163,8 +165,7 @@ func TestClient_UpdateUser_validation(t *testing.T) {
 }
 
 func TestClient_DeleteUser_validation(t *testing.T) {
-	var err error
-	err = testClient.DeleteUser(&DeleteUserInput{
+	err := testClient.DeleteUser(&DeleteUserInput{
 		ID: "",
 	})
 	if err != ErrMissingID {

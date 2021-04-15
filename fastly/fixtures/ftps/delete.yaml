@@ -6,25 +6,24 @@ interactions:
     form: {}
     headers:
       User-Agent:
-      - FastlyGo/1.10.0 (+github.com/fastly/go-fastly; go1.14)
-    url: https://api.fastly.com/service/7i6HN3TK9wS159v2gPAZ8A/version/32/logging/ftp/new-test-ftp
+      - FastlyGo/3.5.0 (+github.com/fastly/go-fastly; go1.16.3)
+    url: https://api.fastly.com/service/7i6HN3TK9wS159v2gPAZ8A/version/21/logging/ftp/new-test-ftp
     method: DELETE
   response:
     body: '{"status":"ok"}'
     headers:
       Accept-Ranges:
       - bytes
-      - bytes
       Cache-Control:
       - no-cache
       Content-Type:
       - application/json
       Date:
-      - Tue, 12 May 2020 15:53:37 GMT
+      - Tue, 13 Apr 2021 19:30:38 GMT
       Fastly-Ratelimit-Remaining:
-      - "799"
+      - "842"
       Fastly-Ratelimit-Reset:
-      - "1589299200"
+      - "1618344000"
       Status:
       - 200 OK
       Strict-Transport-Security:
@@ -32,16 +31,15 @@ interactions:
       Vary:
       - Accept-Encoding
       Via:
-      - 1.1 varnish
-      - 1.1 varnish
+      - 1.1 varnish, 1.1 varnish
       X-Cache:
       - MISS, MISS
       X-Cache-Hits:
       - 0, 0
       X-Served-By:
-      - cache-control-slwdc9035-CONTROL-SLWDC, cache-wdc5535-WDC
+      - cache-control-slwdc9035-CONTROL-SLWDC, cache-den8254-DEN
       X-Timer:
-      - S1589298817.804475,VS0,VE275
+      - S1618342239.743067,VS0,VE241
     status: 200 OK
     code: 200
     duration: ""

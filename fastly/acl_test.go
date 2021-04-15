@@ -1,6 +1,8 @@
 package fastly
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestClient_ACLs(t *testing.T) {
 	t.Parallel()
@@ -8,15 +10,15 @@ func TestClient_ACLs(t *testing.T) {
 	fixtureBase := "acls/"
 
 	testVersion := createTestVersion(t, fixtureBase+"version", testServiceID)
-	
+
 	// Create
 	var err error
 	var a *ACL
 	record(t, fixtureBase+"create", func(c *Client) {
 		a, err = c.CreateACL(&CreateACLInput{
-			Service: testServiceID,
-			Version: testVersion.Number,
-			Name:    "test_acl",
+			ServiceID:      testServiceID,
+			ServiceVersion: testVersion.Number,
+			Name:           "test_acl",
 		})
 	})
 	if err != nil {
@@ -27,19 +29,19 @@ func TestClient_ACLs(t *testing.T) {
 	defer func() {
 		record(t, fixtureBase+"cleanup", func(c *Client) {
 			c.DeleteACL(&DeleteACLInput{
-				Service: testServiceID,
-				Version: testVersion.Number,
-				Name:    "test_acl",
+				ServiceID:      testServiceID,
+				ServiceVersion: testVersion.Number,
+				Name:           "test_acl",
 			})
 
 			c.DeleteACL(&DeleteACLInput{
-				Service: testServiceID,
-				Version: testVersion.Number,
-				Name:    "new_test_acl",
+				ServiceID:      testServiceID,
+				ServiceVersion: testVersion.Number,
+				Name:           "new_test_acl",
 			})
 		})
 	}()
-	
+
 	if a.Name != "test_acl" {
 		t.Errorf("bad name: %q", a.Name)
 	}
@@ -48,8 +50,8 @@ func TestClient_ACLs(t *testing.T) {
 	var as []*ACL
 	record(t, fixtureBase+"list", func(c *Client) {
 		as, err = c.ListACLs(&ListACLsInput{
-			Service: testServiceID,
-			Version: testVersion.Number,
+			ServiceID:      testServiceID,
+			ServiceVersion: testVersion.Number,
 		})
 	})
 	if err != nil {
@@ -63,9 +65,9 @@ func TestClient_ACLs(t *testing.T) {
 	var na *ACL
 	record(t, fixtureBase+"get", func(c *Client) {
 		na, err = c.GetACL(&GetACLInput{
-			Service: testServiceID,
-			Version: testVersion.Number,
-			Name:    "test_acl",
+			ServiceID:      testServiceID,
+			ServiceVersion: testVersion.Number,
+			Name:           "test_acl",
 		})
 	})
 	if err != nil {
@@ -79,10 +81,10 @@ func TestClient_ACLs(t *testing.T) {
 	var ua *ACL
 	record(t, fixtureBase+"update", func(c *Client) {
 		ua, err = c.UpdateACL(&UpdateACLInput{
-			Service: testServiceID,
-			Version: testVersion.Number,
-			Name:    "test_acl",
-			NewName: "new_test_acl",
+			ServiceID:      testServiceID,
+			ServiceVersion: testVersion.Number,
+			Name:           "test_acl",
+			NewName:        "new_test_acl",
 		})
 	})
 	if err != nil {
@@ -99,9 +101,9 @@ func TestClient_ACLs(t *testing.T) {
 	// Delete
 	record(t, fixtureBase+"delete", func(c *Client) {
 		err = c.DeleteACL(&DeleteACLInput{
-			Service: testServiceID,
-			Version: testVersion.Number,
-			Name:    "new_test_acl",
+			ServiceID:      testServiceID,
+			ServiceVersion: testVersion.Number,
+			Name:           "new_test_acl",
 		})
 	})
 	if err != nil {
@@ -113,17 +115,17 @@ func TestClient_ACLs(t *testing.T) {
 func TestClient_ListACLs_validation(t *testing.T) {
 	var err error
 	_, err = testClient.ListACLs(&ListACLsInput{
-		Service: "",
+		ServiceID: "",
 	})
-	if err != ErrMissingService {
+	if err != ErrMissingServiceID {
 		t.Errorf("bad error: %s", err)
 	}
 
 	_, err = testClient.ListACLs(&ListACLsInput{
-		Service: "foo",
-		Version: 0,
+		ServiceID:      "foo",
+		ServiceVersion: 0,
 	})
-	if err != ErrMissingVersion {
+	if err != ErrMissingServiceVersion {
 		t.Errorf("bad error: %s", err)
 	}
 }
@@ -131,17 +133,17 @@ func TestClient_ListACLs_validation(t *testing.T) {
 func TestClient_CreateACL_validation(t *testing.T) {
 	var err error
 	_, err = testClient.CreateACL(&CreateACLInput{
-		Service: "",
+		ServiceID: "",
 	})
-	if err != ErrMissingService {
+	if err != ErrMissingServiceID {
 		t.Errorf("bad error: %s", err)
 	}
 
 	_, err = testClient.CreateACL(&CreateACLInput{
-		Service: "foo",
-		Version: 0,
+		ServiceID:      "foo",
+		ServiceVersion: 0,
 	})
-	if err != ErrMissingVersion {
+	if err != ErrMissingServiceVersion {
 		t.Errorf("bad error: %s", err)
 	}
 }
@@ -149,24 +151,24 @@ func TestClient_CreateACL_validation(t *testing.T) {
 func TestClient_GetACL_validation(t *testing.T) {
 	var err error
 	_, err = testClient.GetACL(&GetACLInput{
-		Service: "",
+		ServiceID: "",
 	})
-	if err != ErrMissingService {
+	if err != ErrMissingServiceID {
 		t.Errorf("bad error: %s", err)
 	}
 
 	_, err = testClient.GetACL(&GetACLInput{
-		Service: "foo",
-		Version: 0,
+		ServiceID:      "foo",
+		ServiceVersion: 0,
 	})
-	if err != ErrMissingVersion {
+	if err != ErrMissingServiceVersion {
 		t.Errorf("bad error: %s", err)
 	}
 
 	_, err = testClient.GetACL(&GetACLInput{
-		Service: "foo",
-		Version: 1,
-		Name:    "",
+		ServiceID:      "foo",
+		ServiceVersion: 1,
+		Name:           "",
 	})
 	if err != ErrMissingName {
 		t.Errorf("bad error: %s", err)
@@ -176,33 +178,33 @@ func TestClient_GetACL_validation(t *testing.T) {
 func TestClient_UpdateACL_validation(t *testing.T) {
 	var err error
 	_, err = testClient.UpdateACL(&UpdateACLInput{
-		Service: "",
+		ServiceID: "",
 	})
-	if err != ErrMissingService {
+	if err != ErrMissingServiceID {
 		t.Errorf("bad error: %s", err)
 	}
 
 	_, err = testClient.UpdateACL(&UpdateACLInput{
-		Service: "foo",
-		Version: 0,
+		ServiceID:      "foo",
+		ServiceVersion: 0,
 	})
-	if err != ErrMissingVersion {
+	if err != ErrMissingServiceVersion {
 		t.Errorf("bad error: %s", err)
 	}
 
 	_, err = testClient.UpdateACL(&UpdateACLInput{
-		Service: "foo",
-		Version: 1,
-		Name:    "",
+		ServiceID:      "foo",
+		ServiceVersion: 1,
+		Name:           "",
 	})
 	if err != ErrMissingName {
 		t.Errorf("bad error: %s", err)
 	}
 	_, err = testClient.UpdateACL(&UpdateACLInput{
-		Service: "foo",
-		Version: 1,
-		Name:    "acl",
-		NewName: "",
+		ServiceID:      "foo",
+		ServiceVersion: 1,
+		Name:           "acl",
+		NewName:        "",
 	})
 	if err != ErrMissingNewName {
 		t.Errorf("bad error: %s", err)
@@ -212,24 +214,24 @@ func TestClient_UpdateACL_validation(t *testing.T) {
 func TestClient_DeleteACL_validation(t *testing.T) {
 	var err error
 	err = testClient.DeleteACL(&DeleteACLInput{
-		Service: "",
+		ServiceID: "",
 	})
-	if err != ErrMissingService {
+	if err != ErrMissingServiceID {
 		t.Errorf("bad error: %s", err)
 	}
 
 	err = testClient.DeleteACL(&DeleteACLInput{
-		Service: "foo",
-		Version: 0,
+		ServiceID:      "foo",
+		ServiceVersion: 0,
 	})
-	if err != ErrMissingVersion {
+	if err != ErrMissingServiceVersion {
 		t.Errorf("bad error: %s", err)
 	}
 
 	err = testClient.DeleteACL(&DeleteACLInput{
-		Service: "foo",
-		Version: 1,
-		Name:    "",
+		ServiceID:      "foo",
+		ServiceVersion: 1,
+		Name:           "",
 	})
 	if err != ErrMissingName {
 		t.Errorf("bad error: %s", err)

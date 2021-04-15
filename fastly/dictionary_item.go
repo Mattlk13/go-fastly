@@ -31,25 +31,25 @@ func (s dictionaryItemsByKey) Less(i, j int) bool {
 
 // ListDictionaryItemsInput is used as input to the ListDictionaryItems function.
 type ListDictionaryItemsInput struct {
-	// Service is the ID of the service (required).
-	Service string
+	// ServiceID is the ID of the service (required).
+	ServiceID string
 
-	// Dictionary is the ID of the dictionary to retrieve items for (required).
-	Dictionary string
+	// DictionaryID is the ID of the dictionary to retrieve items for (required).
+	DictionaryID string
 }
 
 // ListDictionaryItems returns the list of dictionary items for the
 // configuration version.
 func (c *Client) ListDictionaryItems(i *ListDictionaryItemsInput) ([]*DictionaryItem, error) {
-	if i.Service == "" {
-		return nil, ErrMissingService
+	if i.ServiceID == "" {
+		return nil, ErrMissingServiceID
 	}
 
-	if i.Dictionary == "" {
-		return nil, ErrMissingDictionary
+	if i.DictionaryID == "" {
+		return nil, ErrMissingDictionaryID
 	}
 
-	path := fmt.Sprintf("/service/%s/dictionary/%s/items", i.Service, i.Dictionary)
+	path := fmt.Sprintf("/service/%s/dictionary/%s/items", i.ServiceID, i.DictionaryID)
 	resp, err := c.Get(path, nil)
 	if err != nil {
 		return nil, err
@@ -65,10 +65,11 @@ func (c *Client) ListDictionaryItems(i *ListDictionaryItemsInput) ([]*Dictionary
 
 // CreateDictionaryItemInput is used as input to the CreateDictionaryItem function.
 type CreateDictionaryItemInput struct {
-	// Service is the ID of the service. Dictionary is the ID of the dictionary.
-	// Both fields are required.
-	Service    string
-	Dictionary string
+	// ServiceID is the ID of the service (required).
+	ServiceID string
+
+	// DictionaryID is the ID of the dictionary to retrieve items for (required).
+	DictionaryID string
 
 	ItemKey   string `form:"item_key,omitempty"`
 	ItemValue string `form:"item_value,omitempty"`
@@ -76,15 +77,15 @@ type CreateDictionaryItemInput struct {
 
 // CreateDictionaryItem creates a new Fastly dictionary item.
 func (c *Client) CreateDictionaryItem(i *CreateDictionaryItemInput) (*DictionaryItem, error) {
-	if i.Service == "" {
-		return nil, ErrMissingService
+	if i.ServiceID == "" {
+		return nil, ErrMissingServiceID
 	}
 
-	if i.Dictionary == "" {
-		return nil, ErrMissingDictionary
+	if i.DictionaryID == "" {
+		return nil, ErrMissingDictionaryID
 	}
 
-	path := fmt.Sprintf("/service/%s/dictionary/%s/item", i.Service, i.Dictionary)
+	path := fmt.Sprintf("/service/%s/dictionary/%s/item", i.ServiceID, i.DictionaryID)
 	resp, err := c.PostForm(path, i, nil)
 	if err != nil {
 		return nil, err
@@ -113,10 +114,11 @@ func (c *Client) CreateDictionaryItems(i []CreateDictionaryItemInput) ([]Diction
 
 // GetDictionaryItemInput is used as input to the GetDictionaryItem function.
 type GetDictionaryItemInput struct {
-	// Service is the ID of the service. Dictionary is the ID of the dictionary.
-	// Both fields are required.
-	Service    string
-	Dictionary string
+	// ServiceID is the ID of the service (required).
+	ServiceID string
+
+	// DictionaryID is the ID of the dictionary to retrieve items for (required).
+	DictionaryID string
 
 	// ItemKey is the name of the dictionary item to fetch.
 	ItemKey string
@@ -124,19 +126,19 @@ type GetDictionaryItemInput struct {
 
 // GetDictionaryItem gets the dictionary item with the given parameters.
 func (c *Client) GetDictionaryItem(i *GetDictionaryItemInput) (*DictionaryItem, error) {
-	if i.Service == "" {
-		return nil, ErrMissingService
+	if i.ServiceID == "" {
+		return nil, ErrMissingServiceID
 	}
 
-	if i.Dictionary == "" {
-		return nil, ErrMissingDictionary
+	if i.DictionaryID == "" {
+		return nil, ErrMissingDictionaryID
 	}
 
 	if i.ItemKey == "" {
 		return nil, ErrMissingItemKey
 	}
 
-	path := fmt.Sprintf("/service/%s/dictionary/%s/item/%s", i.Service, i.Dictionary, url.PathEscape(i.ItemKey))
+	path := fmt.Sprintf("/service/%s/dictionary/%s/item/%s", i.ServiceID, i.DictionaryID, url.PathEscape(i.ItemKey))
 	resp, err := c.Get(path, nil)
 	if err != nil {
 		return nil, err
@@ -151,32 +153,34 @@ func (c *Client) GetDictionaryItem(i *GetDictionaryItemInput) (*DictionaryItem, 
 
 // UpdateDictionaryItemInput is used as input to the UpdateDictionaryItem function.
 type UpdateDictionaryItemInput struct {
-	// Service is the ID of the service. Dictionary is the ID of the dictionary.
-	// Both fields are required.
-	Service    string
-	Dictionary string
+	// ServiceID is the ID of the service (required).
+	ServiceID string
 
-	// ItemKey is the name of the dictionary item to fetch.
+	// DictionaryID is the ID of the dictionary to retrieve items for (required).
+	DictionaryID string
+
+	// ItemKey is the name of the dictionary item to fetch (required).
 	ItemKey string
 
-	ItemValue string `form:"item_value,omitempty"`
+	// ItemValue is the new value of the dictionary item (required).
+	ItemValue string `form:"item_value"`
 }
 
 // UpdateDictionaryItem updates a specific dictionary item.
 func (c *Client) UpdateDictionaryItem(i *UpdateDictionaryItemInput) (*DictionaryItem, error) {
-	if i.Service == "" {
-		return nil, ErrMissingService
+	if i.ServiceID == "" {
+		return nil, ErrMissingServiceID
 	}
 
-	if i.Dictionary == "" {
-		return nil, ErrMissingDictionary
+	if i.DictionaryID == "" {
+		return nil, ErrMissingDictionaryID
 	}
 
 	if i.ItemKey == "" {
 		return nil, ErrMissingItemKey
 	}
 
-	path := fmt.Sprintf("/service/%s/dictionary/%s/item/%s", i.Service, i.Dictionary, url.PathEscape(i.ItemKey))
+	path := fmt.Sprintf("/service/%s/dictionary/%s/item/%s", i.ServiceID, i.DictionaryID, url.PathEscape(i.ItemKey))
 	resp, err := c.PutForm(path, i, nil)
 	if err != nil {
 		return nil, err
@@ -190,15 +194,16 @@ func (c *Client) UpdateDictionaryItem(i *UpdateDictionaryItemInput) (*Dictionary
 }
 
 type BatchModifyDictionaryItemsInput struct {
-	Service    string `json:"-,"`
-	Dictionary string `json:"-,"`
+	// ServiceID is the ID of the service (required).
+	ServiceID string `json:"-"`
+
+	// DictionaryID is the ID of the dictionary to modify items for (required).
+	DictionaryID string `json:"-"`
 
 	Items []*BatchDictionaryItem `json:"items"`
 }
 
 type BatchDictionaryItem struct {
-
-
 	Operation BatchOperation `json:"op"`
 	ItemKey   string         `json:"item_key"`
 	ItemValue string         `json:"item_value"`
@@ -206,19 +211,19 @@ type BatchDictionaryItem struct {
 
 func (c *Client) BatchModifyDictionaryItems(i *BatchModifyDictionaryItemsInput) error {
 
-	if i.Service == "" {
-		return ErrMissingService
+	if i.ServiceID == "" {
+		return ErrMissingServiceID
 	}
 
-	if i.Dictionary == "" {
-		return ErrMissingDictionary
+	if i.DictionaryID == "" {
+		return ErrMissingDictionaryID
 	}
 
 	if len(i.Items) > BatchModifyMaximumOperations {
-		return ErrBatchUpdateMaximumOperationsExceeded
+		return ErrMaxExceededItems
 	}
 
-	path := fmt.Sprintf("/service/%s/dictionary/%s/items", i.Service, i.Dictionary)
+	path := fmt.Sprintf("/service/%s/dictionary/%s/items", i.ServiceID, i.DictionaryID)
 	resp, err := c.PatchJSON(path, i, nil)
 	if err != nil {
 		return err
@@ -234,10 +239,11 @@ func (c *Client) BatchModifyDictionaryItems(i *BatchModifyDictionaryItemsInput) 
 
 // DeleteDictionaryItemInput is the input parameter to DeleteDictionaryItem.
 type DeleteDictionaryItemInput struct {
-	// Service is the ID of the service. Dictionary is the ID of the dictionary.
-	// Both fields are required.
-	Service    string
-	Dictionary string
+	// ServiceID is the ID of the service (required).
+	ServiceID string
+
+	// DictionaryID is the ID of the dictionary to retrieve items for (required).
+	DictionaryID string
 
 	// ItemKey is the name of the dictionary item to delete.
 	ItemKey string
@@ -245,19 +251,19 @@ type DeleteDictionaryItemInput struct {
 
 // DeleteDictionaryItem deletes the given dictionary item.
 func (c *Client) DeleteDictionaryItem(i *DeleteDictionaryItemInput) error {
-	if i.Service == "" {
-		return ErrMissingService
+	if i.ServiceID == "" {
+		return ErrMissingServiceID
 	}
 
-	if i.Dictionary == "" {
-		return ErrMissingDictionary
+	if i.DictionaryID == "" {
+		return ErrMissingDictionaryID
 	}
 
 	if i.ItemKey == "" {
 		return ErrMissingItemKey
 	}
 
-	path := fmt.Sprintf("/service/%s/dictionary/%s/item/%s", i.Service, i.Dictionary, url.PathEscape(i.ItemKey))
+	path := fmt.Sprintf("/service/%s/dictionary/%s/item/%s", i.ServiceID, i.DictionaryID, url.PathEscape(i.ItemKey))
 	resp, err := c.Delete(path, nil)
 	if err != nil {
 		return err

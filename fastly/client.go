@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
@@ -44,7 +46,7 @@ const DefaultRealtimeStatsEndpoint = "https://rt.fastly.com"
 var ProjectURL = "github.com/fastly/go-fastly"
 
 // ProjectVersion is the version of this library.
-var ProjectVersion = "1.15.0"
+var ProjectVersion = "3.6.0"
 
 // UserAgent is the user agent for this particular client.
 var UserAgent = fmt.Sprintf("FastlyGo/%s (+%s; %s)",
@@ -209,6 +211,11 @@ func (c *Client) PostJSONAPI(p string, i interface{}, ro *RequestOptions) (*http
 	return c.RequestJSONAPI("POST", p, i, ro)
 }
 
+// PostJSONAPIBulk issues an HTTP POST request with the given interface json-encoded and bulk requests.
+func (c *Client) PostJSONAPIBulk(p string, i interface{}, ro *RequestOptions) (*http.Response, error) {
+	return c.RequestJSONAPIBulk("POST", p, i, ro)
+}
+
 // Put issues an HTTP PUT request.
 func (c *Client) Put(p string, ro *RequestOptions) (*http.Response, error) {
 	return c.Request("PUT", p, ro)
@@ -217,6 +224,11 @@ func (c *Client) Put(p string, ro *RequestOptions) (*http.Response, error) {
 // PutForm issues an HTTP PUT request with the given interface form-encoded.
 func (c *Client) PutForm(p string, i interface{}, ro *RequestOptions) (*http.Response, error) {
 	return c.RequestForm("PUT", p, i, ro)
+}
+
+// PutFormFile issues an HTTP PUT request (multipart/form-encoded) to put a file to an endpoint.
+func (c *Client) PutFormFile(urlPath string, filePath string, fieldName string, ro *RequestOptions) (*http.Response, error) {
+	return c.RequestFormFile("PUT", urlPath, filePath, fieldName, ro)
 }
 
 // PutJSON issues an HTTP PUT request with the given interface json-encoded.
@@ -232,6 +244,16 @@ func (c *Client) PutJSONAPI(p string, i interface{}, ro *RequestOptions) (*http.
 // Delete issues an HTTP DELETE request.
 func (c *Client) Delete(p string, ro *RequestOptions) (*http.Response, error) {
 	return c.Request("DELETE", p, ro)
+}
+
+// DeleteJSONAPI issues an HTTP DELETE request with the given interface json-encoded.
+func (c *Client) DeleteJSONAPI(p string, i interface{}, ro *RequestOptions) (*http.Response, error) {
+	return c.RequestJSONAPI("DELETE", p, i, ro)
+}
+
+// DeleteJSONAPIBulk issues an HTTP DELETE request with the given interface json-encoded and bulk requests.
+func (c *Client) DeleteJSONAPIBulk(p string, i interface{}, ro *RequestOptions) (*http.Response, error) {
+	return c.RequestJSONAPIBulk("DELETE", p, i, ro)
 }
 
 // Request makes an HTTP request against the HTTPClient using the given verb,
@@ -280,6 +302,45 @@ func (c *Client) RequestForm(verb, p string, i interface{}, ro *RequestOptions) 
 	return c.Request(verb, p, ro)
 }
 
+// RequestFormFile makes an HTTP request to upload a file to an endpoint.
+func (c *Client) RequestFormFile(verb, urlPath string, filePath string, fieldName string, ro *RequestOptions) (*http.Response, error) {
+	file, err := os.Open(filepath.Clean(filePath))
+	if err != nil {
+		return nil, fmt.Errorf("error reading file: %v", err)
+	}
+	defer file.Close() // #nosec G307
+
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+	part, err := writer.CreateFormFile(fieldName, filepath.Base(filePath))
+	if err != nil {
+		return nil, fmt.Errorf("error creating multipart form: %v", err)
+	}
+
+	_, err = io.Copy(part, file)
+	if err != nil {
+		return nil, fmt.Errorf("error copying file to multipart form: %v", err)
+	}
+
+	err = writer.Close()
+	if err != nil {
+		return nil, fmt.Errorf("error closing multipart form: %v", err)
+	}
+
+	if ro == nil {
+		ro = new(RequestOptions)
+	}
+	if ro.Headers == nil {
+		ro.Headers = make(map[string]string)
+	}
+	ro.Headers["Content-Type"] = writer.FormDataContentType()
+	ro.Headers["Accept"] = "application/json"
+	ro.Body = &body
+	ro.BodyLength = int64(body.Len())
+
+	return c.Request(verb, urlPath, ro)
+}
+
 func (c *Client) RequestJSON(verb, p string, i interface{}, ro *RequestOptions) (*http.Response, error) {
 	if ro == nil {
 		ro = new(RequestOptions)
@@ -312,6 +373,29 @@ func (c *Client) RequestJSONAPI(verb, p string, i interface{}, ro *RequestOption
 	}
 	ro.Headers["Content-Type"] = jsonapi.MediaType
 	ro.Headers["Accept"] = jsonapi.MediaType
+
+	if i != nil {
+		var buf bytes.Buffer
+		if err := jsonapi.MarshalPayload(&buf, i); err != nil {
+			return nil, err
+		}
+
+		ro.Body = &buf
+		ro.BodyLength = int64(buf.Len())
+	}
+	return c.Request(verb, p, ro)
+}
+
+func (c *Client) RequestJSONAPIBulk(verb, p string, i interface{}, ro *RequestOptions) (*http.Response, error) {
+	if ro == nil {
+		ro = new(RequestOptions)
+	}
+
+	if ro.Headers == nil {
+		ro.Headers = make(map[string]string)
+	}
+	ro.Headers["Content-Type"] = jsonapi.MediaType + "; ext=bulk"
+	ro.Headers["Accept"] = jsonapi.MediaType + "; ext=bulk"
 
 	var buf bytes.Buffer
 	if err := jsonapi.MarshalPayload(&buf, i); err != nil {
